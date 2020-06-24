@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
@@ -15,11 +17,14 @@ public class Player : MonoBehaviour
 
     private float moveSpeed = 0.05f;
 
+    public GameObject explosion;
+
     void Start()
     {
         thisController = GetComponent<CharacterController>();
         thisAnimator = GetComponentInChildren<Animator>();
         playerMesh = transform.GetChild(0);
+
     }
 
     void Update()
@@ -52,6 +57,36 @@ public class Player : MonoBehaviour
 
         thisController.Move(MoveDirection);
         transform.position = new Vector3(Mathf.Clamp(transform.position.x, -1.5f, 1.5f), transform.position.y, transform.position.z);
+    }
+
+    public void OnTriggerEnter(Collider others)
+    {
+        if (others.gameObject.tag == "Obstacles")
+        {
+            print("collided");
+
+            Instantiate(explosion, transform.position, Quaternion.identity);
+
+            GameManager.Lives -= 1;
+
+            HUD.HUDManager.UpdateLives();
+
+            if (GameManager.Lives == 0)
+            {
+                SceneManager.LoadScene("GameOver");
+            }
+
+            GameManager.Score -= 1;
+        }
+
+        if (others.gameObject.tag == "ScoreObject")
+        {
+            print(GameManager.Score);
+
+            GameManager.Score += 1;
+
+            HUD.HUDManager.UpdateScore();
+        }
     }
 
 }
